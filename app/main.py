@@ -1,6 +1,21 @@
-def main(): 
-    print("Personal AI is Starting......")
+from fastapi import FastAPI
 
-if __name__ == "__main__":
-    main()
-      
+app = FastAPI(
+    title="Personal AI API",
+    version="0.1.0",
+)
+
+@app.get("/")
+def root():
+    return {
+        "message": "Personal AI API is running"
+    }
+
+@app.get("/health")
+def health():
+    return {
+        "status": "ok"
+    }
+
+
+
