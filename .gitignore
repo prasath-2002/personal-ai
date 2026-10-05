@@ -4,3 +4,10 @@ __pycache__/
 .env
 .vscode/
 data/*.db
+data/
+tests/tmp*/
+tests/ui-data/
+tests/ui-preview.png
+frontend/node_modules/
+frontend/.next/
+*.tsbuildinfo
