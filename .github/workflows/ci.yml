@@ -73,23 +73,48 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     needs:
-      - backend
-      - frontend
+      - sonar
+
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Build backend Docker image
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push backend image
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
         run: |
           docker build \
             -f Dockerfile.backend \
-            -t personal-ai-backend:ci \
+            -t $REGISTRY/personal-ai-backend:$IMAGE_TAG \
             .
 
-      - name: Build frontend Docker image
+          docker push \
+            $REGISTRY/personal-ai-backend:$IMAGE_TAG
+
+      - name: Build and push frontend image
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
         run: |
           docker build \
             --build-arg NEXT_PUBLIC_API_URL=http://localhost:8000 \
-            -t personal-ai-frontend:ci \
+            -t $REGISTRY/personal-ai-frontend:$IMAGE_TAG \
             ./frontend
+
+          docker push \
+            $REGISTRY/personal-ai-frontend:$IMAGE_TAG
