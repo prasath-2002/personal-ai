@@ -4,13 +4,19 @@ WORKDIR /app
 
 COPY requirements.txt .
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN python -m pip install --no-cache-dir \
+    "torch==2.14.0+cpu" \
+    --index-url https://download.pytorch.org/whl/cpu \
+    && python -m pip install --no-cache-dir -r requirements.txt \
+    && python -m pip check \
+    && python -c "import torch, fastapi, uvicorn; assert '+cpu' in torch.__version__; print('Torch:', torch.__version__); print('FastAPI and Uvicorn OK')"
 
 COPY app ./app
+
 RUN mkdir -p /app/data
+
 ENV DATA_DIR=/app/data
 
 EXPOSE 8000
 
 CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
-

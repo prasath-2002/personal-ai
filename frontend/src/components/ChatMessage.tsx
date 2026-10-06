@@ -9,7 +9,6 @@ import {
 import {
   Check,
   Copy,
-  UserRound,
   Sparkles,
 } from "lucide-react";
 
@@ -27,6 +26,10 @@ type ChatMessageProps = {
 type CodeBlockProps = {
   code: string;
   language?: string;
+};
+
+type AvatarProps = {
+  isUser: boolean;
 };
 
 function CodeBlock({
@@ -93,31 +96,33 @@ function CodeBlock({
   );
 }
 
+function Avatar({
+  isUser,
+}: AvatarProps) {
+  return (
+    <div
+      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
+        isUser
+          ? "bg-white text-black"
+          : "border border-white/10 bg-white/10 text-white"
+      }`}
+    >
+      {isUser ? (
+        <span className="text-xs font-semibold">
+          You
+        </span>
+      ) : (
+        <Sparkles size={16} />
+      )}
+    </div>
+  );
+}
+
 export default function ChatMessage({
   role,
   content,
 }: ChatMessageProps) {
   const isUser = role === "user";
-
-  function Avatar() {
-    if (isUser) {
-      return (
-        <div className="message-avatar user-avatar" aria-label="You">
-          <span>P</span>
-          <i />
-        </div>
-      );
-    }
-
-    return (
-      <div className="message-avatar ai-avatar" aria-label="Personal AI">
-        <span className="ai-avatar-orbit" />
-        <span className="ai-avatar-core"><Sparkles size={14} strokeWidth={1.8} /></span>
-        <i className="ai-avatar-signal signal-one" />
-        <i className="ai-avatar-signal signal-two" />
-      </div>
-    );
-  }
 
   return (
     <div
@@ -128,7 +133,7 @@ export default function ChatMessage({
       }`}
     >
       {!isUser && (
-        <Avatar />
+        <Avatar isUser={isUser} />
       )}
 
       <div
@@ -138,7 +143,10 @@ export default function ChatMessage({
             : "message-assistant"
         }`}
       >
-        <div className="message-author">{isUser ? "You" : "Personal AI"}</div>
+        <div className="message-author">
+          {isUser ? "You" : "Personal AI"}
+        </div>
+
         {isUser ? (
           <p className="whitespace-pre-wrap">
             {content}
@@ -184,7 +192,9 @@ export default function ChatMessage({
               ),
 
               li: ({ children }) => (
-                <li>{children}</li>
+                <li>
+                  {children}
+                </li>
               ),
 
               strong: ({ children }) => (
@@ -199,7 +209,10 @@ export default function ChatMessage({
                 </blockquote>
               ),
 
-              a: ({ href, children }) => (
+              a: ({
+                href,
+                children,
+              }) => (
                 <a
                   href={href}
                   target="_blank"
@@ -270,7 +283,7 @@ export default function ChatMessage({
       </div>
 
       {isUser && (
-        <Avatar />
+        <Avatar isUser={isUser} />
       )}
     </div>
   );
