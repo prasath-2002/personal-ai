@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: personal-ai-backend
+  namespace: personal-ai
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: personal-ai-backend
+  template:
+    metadata:
+      labels:
+        app: personal-ai-backend
+    spec:
+      containers:
+        - name: backend
+          image: personal-ai-backend:v2
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: personal-ai-config
+            - secretRef:
+                name: personal-ai-secrets
+                optional: true
+          volumeMounts:
+            - name: app-data
+              mountPath: /app/data
+            - name: model-cache
+              mountPath: /app/model-cache
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+      volumes:
+        - name: app-data
+          persistentVolumeClaim:
+            claimName: personal-ai-data-pvc
+        - name: model-cache
+          persistentVolumeClaim:
+            claimName: personal-ai-model-cache-pvc
