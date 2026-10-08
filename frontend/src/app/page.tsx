@@ -6,6 +6,13 @@ import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import { deleteSession, getSessions, renameSession, type Session } from "@/lib/api";
 
+function createSessionId() {
+  return `chat-${Date.now()}-${Math.random()
+    .toString(36)
+    .slice(2)}`;
+}
+
+
 export default function Home() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [selectedSessionId, setSelectedSessionId] = useState("");
@@ -24,7 +31,7 @@ export default function Home() {
     }).finally(() => {
       if (!active) return;
       const saved = localStorage.getItem("personal-ai-session");
-      const id = saved && /^[A-Za-z0-9_-]{1,100}$/.test(saved) ? saved : `chat-${crypto.randomUUID()}`;
+      const id = saved && /^[A-Za-z0-9_-]{1,100}$/.test(saved) ? saved : createSessionId();
       setSelectedSessionId(id);
       localStorage.setItem("personal-ai-session", id);
     });
@@ -32,7 +39,7 @@ export default function Home() {
   }, []);
 
   function selectSession(id: string) { setSelectedSessionId(id); localStorage.setItem("personal-ai-session", id); }
-  function newChat() { selectSession(`chat-${crypto.randomUUID()}`); }
+  function newChat() { selectSession(createSessionId()); }
 
   async function handleRenameSession(id: string, title: string) {
     try { await renameSession(id, title); await loadSessions(); }
