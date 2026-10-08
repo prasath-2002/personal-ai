@@ -174,7 +174,7 @@ export default function ChatMessage({
               ),
 
               p: ({ children }) => (
-                <p className="mb-3 last:mb-0">
+                <p className="mb-3 last:mb-0">                                                                                                                                                                                                                    
                   {children}
                 </p>
               ),
